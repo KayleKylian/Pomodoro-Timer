@@ -1,3 +1,67 @@
+/**
+ * @file Pomodoro-Timer.c
+ * @brief Implementation of a Pomodoro Timer using Raspberry Pi Pico.
+ *
+ * This file contains the main logic for a Pomodoro Timer, including
+ * initialization, timer callbacks, and GPIO interrupt handling.
+ * 
+ * @include "pico/stdlib.h"
+ * @include "pico/time.h"
+ * @include "hardware/timer.h"
+ * @include "hardware_init.h"
+ * @include "display_status.h"
+ *
+ * @function gpio_irq_handler(uint gpio, uint32_t events)
+ * Interrupt handler for GPIO events.
+ *
+ * @function timer_callback(repeating_timer_t *rt)
+ * Callback function for the repeating timer.
+ *
+ * @function inactive_timer_callback(repeating_timer_t *rt)
+ * Callback function for the inactive timer.
+ *
+ * @function adjust_time(bool is_work_time)
+ * Adjusts the timer based on whether it is work time or break time.
+ *
+ * @var default_work_minutes
+ * Default duration for work periods in minutes.
+ *
+ * @var default_break_minutes
+ * Default duration for break periods in minutes.
+ *
+ * @var work_minutes
+ * Current duration for work periods in minutes.
+ *
+ * @var break_minutes
+ * Current duration for break periods in minutes.
+ *
+ * @var minutes
+ * Current minute count for the timer.
+ *
+ * @var seconds
+ * Current second count for the timer.
+ *
+ * @var on_break
+ * Flag indicating if the timer is currently in a break period.
+ *
+ * @var timer_running
+ * Flag indicating if the timer is currently running.
+ *
+ * @var timer_on
+ * Flag indicating if the timer is currently on.
+ *
+ * @var timer
+ * Repeating timer structure for the main timer.
+ *
+ * @var inactive_timer
+ * Repeating timer structure for the inactive timer.
+ *
+ * @var ssd
+ * External variable for the SSD1306 display.
+ *
+ * @function main()
+ * Main function that initializes the system and enters the main loop.
+ */
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "pico/time.h"
@@ -39,6 +103,24 @@ int main()
     }
 }
 
+/**
+ * @brief GPIO interrupt handler for the Pomodoro Timer.
+ *
+ * This function handles GPIO interrupts for the Pomodoro Timer. It debounces
+ * the button presses and performs actions based on which button was pressed.
+ *
+ * @param gpio The GPIO pin number that triggered the interrupt.
+ * @param events The event type that triggered the interrupt.
+ *
+ * - BUTTON_A: Starts the Pomodoro timer if it is not already running. If the timer
+ *   is on a break, it sets the LED to blue; otherwise, it sets the LED to green.
+ * - BUTTON_B: Pauses the Pomodoro timer if it is running. If the timer is not running
+ *   and not on, it adjusts the work time.
+ * - BUTTON_JS: Stops the Pomodoro timer if it is on. Resets the timer to the default
+ *   work time and turns off the LEDs. If the timer is not on, it adjusts the break time.
+ *
+ * The function also updates the display and manages the timer state.
+ */
 void gpio_irq_handler(uint gpio, uint32_t events) 
 {
     static absolute_time_t last_interrupt_time = {0};
@@ -110,6 +192,31 @@ void gpio_irq_handler(uint gpio, uint32_t events)
     }
 }
 
+/**
+ * @brief Adjusts the timer settings for work or break periods.
+ *
+ * This function updates the default work or break minutes based on the input parameter.
+ * It also updates the display to show the new settings and resets the timer.
+ *
+ * @param is_work_time A boolean value indicating whether to adjust the work time (true) or break time (false).
+ *
+ * The function performs the following steps:
+ * - Clears the SSD1306 display.
+ * - Draws a rectangle on the display.
+ * - If `is_work_time` is true:
+ *   - Increments the default work minutes by 1.
+ *   - Resets the default work minutes to 1 if it exceeds 60.
+ *   - Prints the new work time to the console.
+ *   - Updates the display with the new work time.
+ * - If `is_work_time` is false:
+ *   - Increments the default break minutes by 1.
+ *   - Resets the default break minutes to 1 if it exceeds 30.
+ *   - Prints the new break time to the console.
+ *   - Updates the display with the new break time.
+ * - Updates the global variables for minutes, work_minutes, and break_minutes.
+ * - Sends the updated data to the SSD1306 display.
+ * - Cancels the inactive timer and sets a new repeating timer with a 4000 ms interval.
+ */
 void adjust_time(bool is_work_time) {
     ssd1306_fill(&ssd, false);
     ssd1306_rect(&ssd, 0, 0, WIDTH, HEIGHT, true, false);
@@ -144,6 +251,16 @@ void adjust_time(bool is_work_time) {
     add_repeating_timer_ms(4000, inactive_timer_callback, NULL, &inactive_timer);
 }
 
+/**
+ * @brief Callback function for the repeating timer.
+ *
+ * This function is called periodically by the repeating timer. It updates the 
+ * timer's state, switching between work and break periods, and updates the 
+ * LED indicators accordingly.
+ *
+ * @param rt Pointer to the repeating timer structure.
+ * @return true to keep the timer running, false to stop it.
+ */
 bool timer_callback(repeating_timer_t *rt) 
 {
     if (seconds == 0) {
@@ -175,6 +292,15 @@ bool timer_callback(repeating_timer_t *rt)
     return true;
 }
 
+
+/**
+ * @brief Callback function for the inactive timer.
+ *
+ * This function is called when the timer is inactive. It initializes the display.
+ *
+ * @param rt Pointer to the repeating timer structure.
+ * @return false to stop the timer.
+ */
 bool inactive_timer_callback(repeating_timer_t *rt) 
 {
     initial_display();

@@ -1,4 +1,5 @@
 #include "hardware_init.h"
+#include "display_status.h"
 
 ssd1306_t ssd;
 
@@ -6,15 +7,19 @@ void hardware_init() {
     init_button();
     init_display();
     init_led();
+    initial_display();
 }
 
 void init_button() {
     gpio_init(BUTTON_A);
     gpio_init(BUTTON_B);
+    gpio_init(BUTTON_JS);
     gpio_set_dir(BUTTON_A, GPIO_IN);
     gpio_set_dir(BUTTON_B, GPIO_IN);
+    gpio_set_dir(BUTTON_JS, GPIO_IN);
     gpio_pull_up(BUTTON_A);
     gpio_pull_up(BUTTON_B);
+    gpio_pull_up(BUTTON_JS);
 }
 
 void init_display() {

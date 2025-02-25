@@ -8,6 +8,7 @@
 
 #define BUTTON_A 5
 #define BUTTON_B 6
+#define BUTTON_JS 22
 
 #define LED_RED 13
 #define LED_BLUE 12

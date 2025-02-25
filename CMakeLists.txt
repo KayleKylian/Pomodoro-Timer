@@ -38,7 +38,7 @@ pico_sdk_init()
 add_executable(Pomodoro-Timer 
         src/Pomodoro-Timer.c 
         src/hardware_init.c 
-        src/button_handler.c 
+        src/display_status.c
         inc/ssd1306.c)
 
 pico_set_program_name(Pomodoro-Timer "Pomodoro-Timer")

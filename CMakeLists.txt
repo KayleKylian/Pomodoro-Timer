@@ -35,7 +35,11 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(Pomodoro-Timer src/Pomodoro-Timer.c )
+add_executable(Pomodoro-Timer 
+        src/Pomodoro-Timer.c 
+        src/hardware_init.c 
+        src/button_handler.c 
+        inc/ssd1306.c)
 
 pico_set_program_name(Pomodoro-Timer "Pomodoro-Timer")
 pico_set_program_version(Pomodoro-Timer "0.1")
@@ -56,7 +60,6 @@ target_include_directories(Pomodoro-Timer PRIVATE
 # Add any user requested libraries
 target_link_libraries(Pomodoro-Timer 
         hardware_i2c
-        
         )
 
 pico_add_extra_outputs(Pomodoro-Timer)

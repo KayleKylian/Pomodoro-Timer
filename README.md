@@ -46,7 +46,7 @@ Este projeto implementa um Timer Pomodoro utilizando o Raspberry Pi Pico. O Time
 - **Botão Joystick**: Reseta o Timer Pomodoro ou incrementa o tempo de pausa se o timer não estiver em execução.
 
 ## Demonstração em Vídeo
-[Insira aqui o link para o vídeo demonstrativo do Timer Pomodoro em funcionamento]
+[![Demonstração do Pomodoro Timer](https://img.youtube.com/vi/aV5t_Mg4Uwo/0.jpg)](https://youtu.be/aV5t_Mg4Uwo)
 
 ## Estrutura do Projeto
 - `src/`: Código fonte do projeto.
